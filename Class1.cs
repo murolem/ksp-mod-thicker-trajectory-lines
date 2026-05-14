@@ -84,7 +84,7 @@ namespace ThickerTrajectoryLines
         void Start()
         {
             Debug.Log("[ThickerTrajectoryLines] Patching");
-            var harmony = new Harmony("mod.aliser.thickertrajectorylines");
+            var harmony = new Harmony(ThickerTrajectoryLinesMod.MODID);
             harmony.PatchAll(); // Automatically finds and applies all [HarmonyPatch] classes
             
             // var field = AccessTools.Field(typeof(OrbitRendererBase), "sampleResolution");
@@ -94,4 +94,9 @@ namespace ThickerTrajectoryLines
         }
     }
 
+    public class ThickerTrajectoryLinesMod
+    {
+        public static readonly string MODID = "mod.aliser.thickertrajectorylines";
+        public static readonly string MODNAME = "Thicker Trajectory Lines";
+    }
 }
