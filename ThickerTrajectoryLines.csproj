@@ -9,11 +9,21 @@
     </PropertyGroup>
     <!-- include KSPBuildTools - see below -->
     <ItemGroup>
-        <PackageReference Include="KSPBuildTools" Version="1.1.1"></PackageReference>
+        <PackageReference Include="KSPBuildTools" Version="1.1.1" />
     </ItemGroup>
-    <PropertyGroup>
-        <OutputPath>/home/aliser/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/common/Kerbal Space Program/GameData/ThickerTrajectoryLines/</OutputPath>
-    </PropertyGroup>
+    
+    <!-- Version Files -->
+    <ItemGroup>
+        <KSPVersionFile Include=".">
+            <Version>1.0.0</Version>
+            <KSP_Version>1.12</KSP_Version>
+            <KSP_VERSION_MIN>1.12</KSP_VERSION_MIN>
+            <KSP_VERSION_MAX>1.12</KSP_VERSION_MAX>
+            <Destination>$(KSPBT_ModRoot)/mod.version</Destination>
+            <URL>https://github.com/murolem/ksp-mod-thicker-trajectory-lines/releases/latest/download/mod.version</URL>
+            <Download>https://github.com/murolem/ksp-mod-thicker-trajectory-lines/releases/latest</Download>
+        </KSPVersionFile>
+    </ItemGroup>
 
     <ItemGroup>
         <ModReference Include="0Harmony">
