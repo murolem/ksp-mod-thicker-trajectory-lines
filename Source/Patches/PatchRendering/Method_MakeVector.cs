@@ -16,7 +16,6 @@ namespace ThickerTrajectoryLines
             var vectorLineTraverse = Traverse.Create(__instance).Field("vectorLine");
             if (!vectorLineTraverse.FieldExists())
             {
-                // todo tweak msg we are not setting line width here
                 log.Error("Field 'vectorLine' not found");
                 return;
             }
@@ -29,6 +28,7 @@ namespace ThickerTrajectoryLines
 
             // makes better looking lines
             vectorLine.joins = Joins.Weld;
+            // vectorLine.material.text
             
             Action<float> setLineWidth = newWidth => { vectorLine.lineWidth = newWidth; };
             setLineWidth(SettingsGUI.OrbitalLineWidth);

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using ClickThroughFix;
 using JetBrains.Annotations;
 using KSP.UI.Screens;
@@ -19,9 +20,7 @@ namespace ThickerTrajectoryLines
     [KSPAddon(KSPAddon.Startup.AllGameScenes, false)]
     public class SettingsGUI : MonoBehaviour
     {
-        public static float OrbitalLineWidth = 5f;
-        public static event Action<float> OrbitalLineWidthChanged;
-        
+       
         private static ToolbarControl toolbarControl;
         private static Rect? windowRect;
         private static bool isVisible = false;
@@ -39,57 +38,69 @@ namespace ThickerTrajectoryLines
         void Start()
         {
             CreateButtonIcon();
+            PrepareGUI();
         }
         
         
         void CreateButtonIcon()
         {
-            // Debug.Log("[wawa] CreateButtonIcon");
             toolbarControl = gameObject.AddComponent<ToolbarControl>();
             toolbarControl.AddToAllToolbars(Show, Hide,
                 ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW | ApplicationLauncher.AppScenes.TRACKSTATION,
                 TTLModMeta.MODID,
                 TTLModMeta.MODID + ".button",
-                "ThickerTrajectoryLines/PluginData/Textures/ToolbarButtonIcon38.png",
-                "ThickerTrajectoryLines/PluginData/Textures/ToolbarButtonIcon24.png",
+                $"{TTLModMeta.MODDIRNAME}/PluginData/Textures/ToolbarButtonIcon38.png",
+                $"{TTLModMeta.MODDIRNAME}/PluginData/Textures/ToolbarButtonIcon24.png",
                 "Thicker Trajectory Lines"
             );
         }
 
+
+        private MyWindow settingsWindow;
+        public static float OrbitalLineWidth = 5f;
+        public static event Action<float> OrbitalLineWidthChanged;
+        public static bool UseSolidTrajectoryLines = true;
+        public static event Action<bool> UseSolidTrajectoryLinesChanged;
+        void PrepareGUI()
+        {
+            settingsWindow = new MyWindow("[Settings] Thick Trajectories", 0, 0, 200, 300)
+                .Center();
+
+            {
+                var slider = new MySlider("Window Scale", GameSettings.UI_SCALE, 1f, 4f, 0.1f);
+                slider.ValueChanged += newValue =>
+                {
+                    settingsWindow.SetScale(newValue);
+                };
+                settingsWindow.Append(slider);
+            }
+            {
+                var slider = new MySlider("Trajectory Line Width", OrbitalLineWidth, 5f, 50f, 1f);
+                slider.ValueChanged += newValue =>
+                    {
+                        OrbitalLineWidth = newValue;
+                        OrbitalLineWidthChanged?.Invoke(newValue);
+                    };
+                settingsWindow.Append(slider);
+            }
+
+            {
+                var toggle = new MyCheckbox("Use Solid Trajectory Lines?", UseSolidTrajectoryLines);
+                toggle.ValueChanged += newValue =>
+                {
+                    UseSolidTrajectoryLines = newValue;
+                    UseSolidTrajectoryLinesChanged?.Invoke(newValue);
+                };
+                settingsWindow.Append(toggle);
+            }
+        }
  
         void OnGUI()
         {
             if (isVisible)
             {
-                var id = 60273460;
-                if (windowRect == null)
-                {
-                    var width = 200;
-                    var height = 300;
-                    // todo pick position near the toolbar button instead
-                    var x = Screen.width - width / 2 - 100;
-                    var y = Screen.height / 2 - height / 2;
-                    windowRect = new Rect(x, y, width, height);
-                }
-                windowRect = ClickThruBlocker.GUILayoutWindow(id, (Rect)windowRect, PopulateGUI, "Thick Trajectories Settings");
+                settingsWindow.Draw();
             }
-        }
-        
-        // todo add scale slider (100% - 300%?)
-        private static void PopulateGUI(int id)
-        {
-            GUILayout.Label("Orbital Line Width");
-            // Label for the slider
-            var oldValue = OrbitalLineWidth;
-            // todo fine tune max value
-            // todo add min and max values as labels, add current value as label
-            OrbitalLineWidth = GUILayout.HorizontalSlider(OrbitalLineWidth, 5f, 50f);
-            if (OrbitalLineWidth != oldValue)
-            {
-                OrbitalLineWidthChanged?.Invoke(OrbitalLineWidth);
-            }
-            
-            GUI.DragWindow(new Rect(0, 0, 10000, 20));
         }
     }
 }
