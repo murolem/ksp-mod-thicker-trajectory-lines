@@ -36,11 +36,17 @@
             <DLLPath>GameData/001_ToolbarControl/Plugins/ToolbarControl.dll</DLLPath>
         </ModReference>
     </ItemGroup>
+    
+    <ItemGroup>
+      <Folder Include="Static\" />
+    </ItemGroup>
 
+    <!-- include static assets -->
     <Target Name="OnBuild" BeforeTargets="Build">
         <ItemGroup>
-            <Folder Include="PluginData/*/**" />
+            <StaticFiles Include="Static/**/*" />
         </ItemGroup>
-        <Copy SourceFiles="@(Folder)" DestinationFolder="$(KSPBT_ModRoot)/PluginData/%(RecursiveDir)"></Copy>
+        <Copy SourceFiles="@(StaticFiles)"
+              DestinationFolder="$(KSPBT_ModRoot)/%(RecursiveDir)" />
     </Target>
 </Project>
