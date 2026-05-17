@@ -44,7 +44,8 @@ namespace ThickerTrajectoryLines
             
             // slider
             var oldValue = value;
-            var newValue = GUILayout.HorizontalSlider(value, min, max, guiStyle, guiStyle);
+            // todo scale
+            var newValue = GUILayout.HorizontalSlider(value, min, max);
             newValue = MathfUtils.RoundStep(newValue, step);
             if (newValue != oldValue)
             {

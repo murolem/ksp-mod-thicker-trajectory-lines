@@ -19,7 +19,10 @@ namespace ThickerTrajectoryLines
         public void Draw(GUIStyle guiStyle)
         {
             var oldValue = toggle;
-            var newValue = GUILayout.Toggle(toggle, label, guiStyle); 
+            var style = new GUIStyle(GUI.skin.toggle);
+            style.fontSize = guiStyle.fontSize;
+            // todo scale
+            var newValue = GUILayout.Toggle(toggle, label, style); 
             toggle = newValue;
             
             if (newValue != oldValue)

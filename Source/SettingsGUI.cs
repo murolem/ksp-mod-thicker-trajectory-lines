@@ -94,7 +94,12 @@ namespace ThickerTrajectoryLines
                 settingsWindow.Append(toggle);
             }
         }
- 
+
+        private void OnDisable()
+        {
+            Hide();
+        }
+
         void OnGUI()
         {
             if (isVisible)

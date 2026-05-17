@@ -23,20 +23,9 @@ namespace ThickerTrajectoryLines
             var log = new Logger("ThickerTrajectoryLines/PatchRendering__Ctor/Postfix");
             log.Verbose("Running");
 
-            if (TILModConsts.GlowFade)
+            if (SettingsGUI.UseSolidTrajectoryLines && TILModConsts.GlowFade)
             {
-                var oldTexture = __instance.lineMaterial.mainTexture;
-                if (SettingsGUI.UseSolidTrajectoryLines)
-                {
-                    __instance.lineMaterial.mainTexture = TILModConsts.GlowFade;
-                }
-
-                SettingsGUI.UseSolidTrajectoryLinesChanged += toggle =>
-                {
-                    __instance.lineMaterial.mainTexture = toggle
-                        ? TILModConsts.GlowFade
-                        : oldTexture;
-                };
+                __instance.lineMaterial.mainTexture = TILModConsts.GlowFade;
             }
             
             Action<float> setLineWidth = newWidth => { __instance.lineWidth = newWidth; };

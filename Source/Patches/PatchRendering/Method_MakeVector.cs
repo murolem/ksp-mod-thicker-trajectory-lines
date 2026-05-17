@@ -28,11 +28,20 @@ namespace ThickerTrajectoryLines
 
             // makes better looking lines
             vectorLine.joins = Joins.Weld;
-            // vectorLine.material.text
             
+            // adjust width immediately and keep a tab at it
             Action<float> setLineWidth = newWidth => { vectorLine.lineWidth = newWidth; };
             setLineWidth(SettingsGUI.OrbitalLineWidth);
             SettingsGUI.OrbitalLineWidthChanged += setLineWidth;
+            
+            // keep a tab at requested texture for the line
+            var oldTexture = vectorLine.material.mainTexture;
+            SettingsGUI.UseSolidTrajectoryLinesChanged += toggle =>
+            {
+                vectorLine.material.mainTexture = toggle
+                    ? TILModConsts.GlowFade
+                    : oldTexture;
+            };
         }
     }
 }
