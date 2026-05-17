@@ -45,11 +45,6 @@ namespace ThickerTrajectoryLines
             this.closeButton.OnPressed += () => Hide();
         }
 
-        /// <summary>
-        /// Ensure styles of children and self.
-        ///
-        /// Must be called after all children were appended.
-        /// </summary>
         private MyWindow EnsureStyles()
         {
             var titlePaddingBase = MyGUI.RectOffset(5f);
@@ -204,22 +199,15 @@ namespace ThickerTrajectoryLines
                 toolbarButtonRect = toolbarBtnRect
             };
         }
-
-        private Dictionary<ToolbarStateDock, Vector2> mapOfToolbarDockToAwayVector =
-            new Dictionary<ToolbarStateDock, Vector2>()
-            {
-                { ToolbarStateDock.BOTTOM, new Vector2(0f, -1f) },
-                { ToolbarStateDock.TOP, new Vector2(0, 1f) },
-                { ToolbarStateDock.LEFT, new Vector2(1f, 1f) },
-                { ToolbarStateDock.RIGHT, new Vector2(-1f, 1f) }
-            };
-
+        
+        /// <summary>
+        /// Move near the toolbar button.
+        /// </summary>
+        /// <returns></returns>
         public MyWindow Dock()
         {
             var toolbarState = GuessToolbarState();
             var gap = 5f;
-
-            // var offsetVec = mapOfToolbarDockToAwayVector[toolbarState.dockSide];
 
             var offsetVec = new Vector2();
             switch (toolbarState.dockSide)
@@ -291,13 +279,11 @@ namespace ThickerTrajectoryLines
             }
             
             // do not put title here, draw it as a separate label instead since the normal one can't scale properly
-            // var previousRect = new Rect(rect);
             rect = GUILayout.Window(id, rect, _Draw, "", style, GUILayout.Width(rect.width), GUILayout.ExpandWidth(true));
             
             // scale if possible (when user lets go of the scale slider)
-            if (MyGUI.DirtyScaleReady && !Input.GetMouseButton(0))
+            if (MyGUI.Scale != MyGUI.DirtyScale && !Input.GetMouseButton(0))
             {
-                MyGUI.DirtyScaleReady = false;
                 MyGUI.Scale = MyGUI.DirtyScale;
                 MyGUI.ScaleChanged?.Invoke(MyGUI.Scale);
                 MyGUI.ScaleChangedLowPriority?.Invoke(MyGUI.Scale);

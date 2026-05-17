@@ -43,7 +43,7 @@ namespace ThickerTrajectoryLines
 
         public static Texture2D LoadTextureFromFile(string filepath, int width, int height)
         {
-            var log =  new Logger("ThickerTrajectoryLines/LoadTextureFromFile");
+            var log = new Logger("ThickerTrajectoryLines/LoadTextureFromFile");
             
             Texture2D tex = new Texture2D(width, height, UnityEngine.TextureFormat.ARGB32, false);
             if (!File.Exists(filepath))

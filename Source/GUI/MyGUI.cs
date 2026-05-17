@@ -35,7 +35,7 @@ namespace ThickerTrajectoryLines
         public static GUISkin defaultSkin = HighLogic.Skin;
         
         /// <summary>
-        /// UI Scale.
+        /// UI Scale. Only updates when user lets go of the scale slider.
         /// </summary>
         public static float Scale = GameSettings.UI_SCALE;
         public static Action<float> ScaleChanged;
@@ -57,13 +57,6 @@ namespace ThickerTrajectoryLines
         /// </summary>
         public static float DirtyScale = 1f;
 
-        /// <summary>
-        /// Whether the dirty scale is ready to be synced with the regular scale.
-        /// Set to true once the user lets go of the slider.
-        /// Early in an OnGUI call, the scale is synced and the flag is set to false again.
-        /// </summary>
-        public static bool DirtyScaleReady = false;
-        
         // a random value I found in ksp source code. idk how to get actual font size
         public static readonly int BaseFontSize = 14;
 

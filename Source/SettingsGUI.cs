@@ -81,7 +81,6 @@ namespace ThickerTrajectoryLines
                 var slider = new MySlider("Window Scale", MyGUI.Scale, 1f, 4f, 0.1f);
                 slider.ValueChanged += newValue => { 
                     MyGUI.DirtyScale = newValue;
-                    MyGUI.DirtyScaleReady = true;
                 };
                 settingsWindow.Append(slider);
             }

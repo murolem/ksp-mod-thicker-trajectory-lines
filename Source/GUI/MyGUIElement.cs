@@ -9,14 +9,17 @@ namespace ThickerTrajectoryLines
     public interface MyGUIElement
     {
         /// <summary>
-        /// Current style. Initially `null` since it can only be set while in OnGUI event.
+        /// Element style. Some elements (like the slider) can have some extra styles in their class (like the thumb style, on the slider).
+        ///
+        /// Initially `null` (since it can only be set while in OnGUI event), set to some style while the element is being drawn.
+        /// Can be set and returned early by calling `EnsureStyle` while in OnGUI.
         /// </summary>
         GUIStyle Style { get; }
         
         /// <summary>
         /// Ensures that `Style` (1) has a value and (2) the value is appropriate for that type of control.
         ///
-        /// By default, uses the default KSP style for that element and respect the `Scaling` in `MyGUI`.
+        /// By default, uses the default KSP style for that element with respect to the `Scaling` in `MyGUI`.
         ///
         /// Can only be called while in OnGUI event.
         ///
@@ -26,12 +29,13 @@ namespace ThickerTrajectoryLines
         GUIStyle EnsureStyle();
         
         /// <summary>
-        /// Render the control. Can only be called while in OnGUI event.
+        /// Renders the control. Can only be called while in OnGUI.
         ///
         /// Some controls can return values, but they are not returned by this method.
         /// Instead, they can be accessible via relevant for controls fields (eg `Toggle`, `Pressed`, etc). 
         /// </summary>
-        /// <param name="styleOverride">If not `null`, this style will be used instead of `Style`. If `null`, uses `Style` by calling `EnsureStyle`.</param>
+        /// <param name="styleOverride">If not `null`, the given style will be used instead of the element's `Style`.
+        /// If `null`, uses the element's `Style` by calling `EnsureStyle`.</param>
         /// <param name="options">GUI options to pass along to the control.</param>
         void Draw(GUIStyle styleOverride = null, params GUILayoutOption[] options);
     }
