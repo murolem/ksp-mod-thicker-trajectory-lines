@@ -81,7 +81,7 @@ namespace ThickerTrajectoryLines
                 var newHeight = baseHeight * newScale;
                 var horizOffsetDueToResize = (newWidth - this.rect.width) / 2f;
                 var vertOffsetDueToResize = (newHeight - this.rect.height) / 2f;
-                // this.rect.x -= horizOffsetDueToResize;
+                this.rect.x -= horizOffsetDueToResize;
                 // this.rect.y -= horizOffsetDueToResize;
                 this.rect.width = newWidth;
                 this.rect.height = newHeight;
@@ -135,14 +135,23 @@ namespace ThickerTrajectoryLines
         
         public MyWindow Show()
         {
-            Debug.Log("Show requested");
-            showStage = ShowStage.PENDING_OFFSCREEN_DRAW1;
+            // Debug.Log("Show requested");
+            
+            // if rect changed after dock = user moved the window = do not force the dock position over user choice.
+            if (afterDockRect != default && (rect.x != afterDockRect.x || afterDockRect.y != afterDockRect.y))
+            {
+                showStage = ShowStage.VISIBLE;    
+            }
+            else
+            {
+                showStage = ShowStage.PENDING_OFFSCREEN_DRAW1;
+            }
             return this;
         }
         
         public MyWindow Hide()
         {
-            Debug.Log("Hide requested");
+            // Debug.Log("Hide requested");
             showStage = ShowStage.HIDDEN;
             return this;
         }
@@ -172,23 +181,23 @@ namespace ThickerTrajectoryLines
                 toolbarBtnRect.x + toolbarBtnRect.width / 2f,
                 toolbarBtnRect.y + toolbarBtnRect.height / 2f
             );
-            Debug.Log("toolbarBtnCenter: " + toolbarBtnCenter);
+            // Debug.Log("toolbarBtnCenter: " + toolbarBtnCenter);
             var vecToToolbarBtnCenter = toolbarBtnCenter - new Vector2(Screen.width / 2f, Screen.height / 2f);
-            Debug.Log("vecToToolbarBtnCenter: " + vecToToolbarBtnCenter);
+            // Debug.Log("vecToToolbarBtnCenter: " + vecToToolbarBtnCenter);
             var angleRadSigned = Mathf.Atan2(vecToToolbarBtnCenter.y, vecToToolbarBtnCenter.x);
-            Debug.Log("angleRadSigned: " + angleRadSigned);
+            // Debug.Log("angleRadSigned: " + angleRadSigned);
             // begins CW at (-1, 0)
             // take the signed angle, make it unsigned.
             // by doing this, the vector will be 0 at (-1, 0), which is the zero index for the dock enum.
             var angleRadUnsignedSectored = angleRadSigned + Math.PI;
-            Debug.Log("angleRadUnsignedSectored: " + angleRadUnsignedSectored);
+            // Debug.Log("angleRadUnsignedSectored: " + angleRadUnsignedSectored);
             // then just mod it by 1/4 of a circle and floor it to get the dock index.
             // this will get us a pie sector, indexed 0 to 3. 
             // in case my math if fucked up, make it safe positive integer 0-3 so that it's always a valid index.
             var sector = Math.Ceiling(angleRadUnsignedSectored / (Math.PI / 2));
-            Debug.Log("sector: " + sector);
+            // Debug.Log("sector: " + sector);
             var dock = (ToolbarStateDock)(Math.Floor(Math.Abs(sector % 4)));
-            Debug.Log("dock: " + dock);
+            // Debug.Log("dock: " + dock);
 
             return new ToolbarState(){
                 dockSide = dock,
@@ -222,21 +231,21 @@ namespace ThickerTrajectoryLines
                     offsetVec.y = -1 * (gap + rect.height);
                     break;
                 case ToolbarStateDock.TOP:
-                    return this;
-                    // offsetVec.y += toolbarState.toolbarButtonRect.height + gap + rect.height;
+                    // assuming top left start going right
+                    offsetVec.x += toolbarState.toolbarButtonRect.width + gap;
+                    offsetVec.y += toolbarState.toolbarButtonRect.height + gap;
                     break;
                 case ToolbarStateDock.LEFT:
-                    return this;
-                    // offsetVec.x += toolbarState.toolbarButtonRect.width + gap + rect.width;
+                    // assuming bottom left start going up
+                    offsetVec.x += toolbarState.toolbarButtonRect.width + gap;
                     break;
             }
-            
-            Debug.Log("Dock side: " + toolbarState.dockSide);
 
+            // offset by the offset vec and compensate if we get offscreen
             rect.x = Mathf.Clamp(toolbarState.toolbarButtonRect.x + offsetVec.x, rect.width, Screen.width - rect.width);
             rect.y = Mathf.Clamp(toolbarState.toolbarButtonRect.y + offsetVec.y, rect.width, Screen.height - rect.height);
             afterDockRect = new Rect(rect);
-            Debug.Log("Via docking rect set to: " + rect.ToString());
+            // Debug.Log("Via docking rect set to: " + rect.ToString());
 
             return this;
         }
@@ -250,7 +259,7 @@ namespace ThickerTrajectoryLines
 
         public void Draw()
         {
-            Debug.Log("Draw called, show stage: " + showStage + " Rect: " + rect.ToString());
+            // Debug.Log("Draw called, show stage: " + showStage + " Rect: " + rect.ToString());
             
             if (!this.Visible)
             {
@@ -271,7 +280,7 @@ namespace ThickerTrajectoryLines
                     break;
             }
             
-            Debug.Log("(After showStage switch) Show stage: " + showStage + " Rect: " + rect.ToString());
+            // Debug.Log("(After showStage switch) Show stage: " + showStage + " Rect: " + rect.ToString());
             
             if (!firstDrawDone)
             {
@@ -284,14 +293,7 @@ namespace ThickerTrajectoryLines
             // do not put title here, draw it as a separate label instead since the normal one can't scale properly
             // var previousRect = new Rect(rect);
             rect = GUILayout.Window(id, rect, _Draw, "", style, GUILayout.Width(rect.width), GUILayout.ExpandWidth(true));
-
-            // switch (this.showStage)
-            // {
-            //     case ShowStage.VISIBLE:
-            //         rect = previousRect;
-            //         break;
-            // }
-
+            
             // scale if possible (when user lets go of the scale slider)
             if (MyGUI.DirtyScaleReady && !Input.GetMouseButton(0))
             {
