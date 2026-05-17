@@ -55,7 +55,7 @@ namespace ThickerTrajectoryLines
         /// Scale but changes constantly while user drags the scale slider.
         /// The normal scale is only updated when users lets go of the slider.
         /// </summary>
-        public static float DirtyScale = 1f;
+        public static float DirtyScale = Scale;
 
         // a random value I found in ksp source code. idk how to get actual font size
         public static readonly int BaseFontSize = 14;
