@@ -5,15 +5,25 @@ namespace ThickerTrajectoryLines
     // haha myspace
     public class MySpace : MyGUIElement
     {
+        public GUIStyle Style { get; private set; }
+        
         private int pixels;
         public MySpace(int pixels)
         {
             this.pixels = pixels;
         }
         
-        public void Draw(GUIStyle guiStyle)
+        // not used here
+        public GUIStyle EnsureStyle()
         {
-            GUILayout.Space(this.pixels * GameSettings.UI_SCALE);
+            this.Style = this.Style ?? MyGUI.MakeGUIStyle(GUI_STYLE_NAME.box);
+            return this.Style;
+        }
+        
+        // options not used here
+        public void Draw(GUIStyle styleOverride = null, params GUILayoutOption[] options)
+        {
+            GUILayout.Space(this.pixels * 2);
         }
     }
 }

@@ -1,10 +1,12 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 using System;
 using System.Collections.Generic;
-using ClickThroughFix;
-using JetBrains.Annotations;
 using KSP.UI.Screens;
 using ToolbarControl_NS;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace ThickerTrajectoryLines
 {
@@ -20,33 +22,35 @@ namespace ThickerTrajectoryLines
     [KSPAddon(KSPAddon.Startup.AllGameScenes, false)]
     public class SettingsGUI : MonoBehaviour
     {
-       
-        private static ToolbarControl toolbarControl;
-        private static Rect? windowRect;
-        private static bool isVisible = false;
+        public static SettingsGUI Instance { get; private set; }
+        public static ToolbarControl ToolbarControl { get; private set; }
         
-        public static void Show()
-        {
-            isVisible = true;
-        }
+        public static float OrbitalLineWidth = 5f;
+        public static event Action<float> OrbitalLineWidthChanged;
+        public static bool UseSolidTrajectoryLines = true;
+        public static event Action<bool> UseSolidTrajectoryLinesChanged;
         
-        public static void Hide()
+        private MyWindow settingsWindow;
+
+        void Awake()
         {
-            isVisible = false;
+            Instance = this;
         }
         
         void Start()
         {
-            CreateButtonIcon();
             PrepareGUI();
+            CreateButtonIcon();
         }
-        
         
         void CreateButtonIcon()
         {
-            toolbarControl = gameObject.AddComponent<ToolbarControl>();
-            toolbarControl.AddToAllToolbars(Show, Hide,
-                ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW | ApplicationLauncher.AppScenes.TRACKSTATION,
+            ToolbarControl = gameObject.AddComponent<ToolbarControl>();
+            // toggle instead of Hide/Show since our window is closable by the close button,
+            // which the toolbar control doesn't know about and will not update its state. 
+            ToolbarControl.AddToAllToolbars(() => settingsWindow.Toggle(), () => settingsWindow.Toggle(),
+                ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW |
+                ApplicationLauncher.AppScenes.TRACKSTATION,
                 TTLModMeta.MODID,
                 TTLModMeta.MODID + ".button",
                 $"{TTLModMeta.MODDIRNAME}/PluginData/Textures/ToolbarButtonIcon38.png",
@@ -54,57 +58,53 @@ namespace ThickerTrajectoryLines
                 "Thicker Trajectory Lines"
             );
         }
+        
+        void OnGUI()
+        {
+            if (settingsWindow.Visible)
+            {
+                settingsWindow.Draw();
+            }
+        }
 
-
-        private MyWindow settingsWindow;
-        public static float OrbitalLineWidth = 5f;
-        public static event Action<float> OrbitalLineWidthChanged;
-        public static bool UseSolidTrajectoryLines = true;
-        public static event Action<bool> UseSolidTrajectoryLinesChanged;
         void PrepareGUI()
         {
-            settingsWindow = new MyWindow("[Settings] Thick Trajectories", 0, 0, 200, 300)
+            settingsWindow = new MyWindow("[Settings] Thick Trajectories", 0, 0, 400, 1)
                 .Center();
 
             {
-                var slider = new MySlider("Window Scale", GameSettings.UI_SCALE, 1f, 4f, 0.1f);
-                slider.ValueChanged += newValue =>
-                {
-                    settingsWindow.SetScale(newValue);
+                settingsWindow.Append(
+                    new MySection("TECHNICAL")
+                );
+            }
+            {
+                var slider = new MySlider("Window Scale", MyGUI.Scale, 1f, 4f, 0.1f);
+                slider.ValueChanged += newValue => { 
+                    MyGUI.DirtyScale = newValue;
+                    MyGUI.DirtyScaleReady = true;
                 };
                 settingsWindow.Append(slider);
             }
             {
+                settingsWindow.Append(new MySection("TRAJECTORY"));
+            }
+            {
                 var slider = new MySlider("Trajectory Line Width", OrbitalLineWidth, 5f, 50f, 1f);
                 slider.ValueChanged += newValue =>
-                    {
-                        OrbitalLineWidth = newValue;
-                        OrbitalLineWidthChanged?.Invoke(newValue);
-                    };
+                {
+                    OrbitalLineWidth = newValue;
+                    OrbitalLineWidthChanged?.Invoke(newValue);
+                };
                 settingsWindow.Append(slider);
             }
-
             {
-                var toggle = new MyCheckbox("Use Solid Trajectory Lines?", UseSolidTrajectoryLines);
+                var toggle = new MyToggle("Use Solid Trajectory Lines?", UseSolidTrajectoryLines);
                 toggle.ValueChanged += newValue =>
                 {
                     UseSolidTrajectoryLines = newValue;
                     UseSolidTrajectoryLinesChanged?.Invoke(newValue);
                 };
                 settingsWindow.Append(toggle);
-            }
-        }
-
-        private void OnDisable()
-        {
-            Hide();
-        }
-
-        void OnGUI()
-        {
-            if (isVisible)
-            {
-                settingsWindow.Draw();
             }
         }
     }
