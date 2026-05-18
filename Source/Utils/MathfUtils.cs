@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ThickerTrajectoryLines
 {
-    public class MathfUtils
+    public static class MathfUtils
     {
         public static float RoundStep(float value, float step)
         {

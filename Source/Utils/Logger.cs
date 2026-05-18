@@ -24,6 +24,8 @@ namespace ThickerTrajectoryLines
         {
             Logger.logLevel = logLevel;
         }
+        
+        public Logger() {}
 
         public Logger(string prefix)
         {
@@ -92,11 +94,11 @@ namespace ThickerTrajectoryLines
             
             switch (level)
             {
-                case LogLevel.DEBUG:
-                    UnityEngine.Debug.Log(msg);
-                    break;
                 case LogLevel.ERROR:
                     UnityEngine.Debug.LogError(msg);
+                    break;
+                default:
+                    UnityEngine.Debug.Log(msg);
                     break;
             }
         }

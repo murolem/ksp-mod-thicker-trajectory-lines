@@ -1,15 +1,16 @@
 using System;
 using HarmonyLib;
+using UnityEngine;
 using Vectrosity;
 
 namespace ThickerTrajectoryLines
 {
     [HarmonyPatch(typeof(PatchRendering), nameof(PatchRendering.MakeVector))]
-    public class Patch_PatchRendering__MakeVector
+    public class Patch_PatchRendering_MakeVector
     {
         static void Postfix(PatchRendering __instance)
         {
-            var log = new Logger("ThickerTrajectoryLines/PatchRendering__MakeVector/Postfix");
+            var log = new Logger("Patch_PatchRendering_MakeVector/Postfix");
             
             log.Verbose("Running");
             
@@ -30,18 +31,27 @@ namespace ThickerTrajectoryLines
             vectorLine.joins = Joins.Weld;
             
             // adjust width immediately and keep a tab at it
-            Action<float> setLineWidth = newWidth => { vectorLine.lineWidth = newWidth; };
-            setLineWidth(SettingsGUI.OrbitalLineWidth);
-            SettingsGUI.OrbitalLineWidthChanged += setLineWidth;
+            void SetLineWidth(float newWidth)
+            {
+                vectorLine.lineWidth = newWidth;
+            }
+            SetLineWidth(SettingsGUI.Instance.OrbitalLineWidth);
+            SettingsGUI.Instance.OrbitalLineWidthChanged += SetLineWidth;
             
             // keep a tab at requested texture for the line
-            var oldTexture = vectorLine.material.mainTexture;
-            SettingsGUI.UseSolidTrajectoryLinesChanged += toggle =>
+            if (Globals.GlowFade)
             {
-                vectorLine.material.mainTexture = toggle
-                    ? TILModConsts.GlowFade
-                    : oldTexture;
-            };
+                var oldTexture = vectorLine.material.mainTexture;
+                void SetLineTexture(bool toggle)
+                {
+                    // log.Debug("Switching texture to: " + toggle);
+                    vectorLine.material.mainTexture = toggle
+                        ? Globals.GlowFade
+                        : oldTexture;
+                }
+                SetLineTexture(SettingsGUI.Instance.UseSolidGlowFadeTrajectoryTexture);
+                SettingsGUI.Instance.UseSolidGlowFadeTrajectoryTextureChanged += SetLineTexture;
+            }
         }
     }
 }
