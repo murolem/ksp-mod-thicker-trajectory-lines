@@ -4,6 +4,9 @@ using UnityEngine;
 
 // todo click blocking
 // todo replace all Debug. with the Logger calls
+// todo why are you (not) running. verbose patch log()s not running for some reason? log.Verbose
+// todo move scale to the the settings gui class. make it saveable.
+// make settings log not verbose since that's something user can interact with? potentially
 
 namespace ThickerTrajectoryLines
 {
@@ -19,7 +22,12 @@ namespace ThickerTrajectoryLines
         /// <summary>
         /// Static data folder (Static folder in the repo). Meant to be unchanged.
         /// </summary>
-        public static string modStaticDataDirpath => Path.GetFullPath($"{modDirpath}/PluginData/");
+        public static string modStaticDataDirname = "PluginData";
+
+        /// <summary>
+        /// Static data folder (Static folder in the repo). Meant to be unchanged.
+        /// </summary>
+        public static string modStaticDataDirpath => Path.GetFullPath($"{modDirpath}/{modStaticDataDirname}/");
         
         /// <summary>
         /// Static config filepath. Config that is used internally and is shipped with the mod. Meant to be unchanged.
@@ -49,7 +57,7 @@ namespace ThickerTrajectoryLines
             // todo remove on release
             Logger.SetLogLevel(LogLevel.VERBOSE);
 
-            var log = new Logger("ThickerTrajectoryLines");
+            var log = new Logger();
             log.Debug("Patching");
 
             var harmony = new Harmony(Meta.modId);
@@ -68,7 +76,7 @@ namespace ThickerTrajectoryLines
 
         static Texture2D LoadTextureFromFile(string filepath, int width, int height)
         {
-            var log = new Logger("ThickerTrajectoryLines/LoadTextureFromFile");
+            var log = new Logger();
             
             Texture2D tex = new Texture2D(width, height, UnityEngine.TextureFormat.ARGB32, false);
             if (!File.Exists(filepath))

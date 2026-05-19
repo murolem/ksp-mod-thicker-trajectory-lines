@@ -8,8 +8,8 @@ namespace ThickerTrajectoryLines
     {
         public GUIStyle Style { get; private set; }
         public GUIStyle ThumbStyle { get; private set; }
-        public Action<float> ValueChanged;
         public float Value { get; private set; }
+        public event Action<float> ValueChanged;
         
         private string label;
         private float min;
@@ -111,6 +111,12 @@ namespace ThickerTrajectoryLines
             GUILayout.EndHorizontal();
             
             GUILayout.Space(sliderMargin.bottom);
+        }
+
+        public MySlider OnValueChanged(Action<float> listener)
+        {
+            ValueChanged += listener;
+            return this;
         }
     }
 }

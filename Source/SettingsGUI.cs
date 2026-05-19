@@ -1,13 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using KSP.UI.Screens;
 using ToolbarControl_NS;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace ThickerTrajectoryLines
 {
@@ -26,17 +21,34 @@ namespace ThickerTrajectoryLines
         public static SettingsGUI Instance { get; private set; }
         public static ToolbarControl ToolbarControl { get; private set; }
         
-        // game default = 5f
-        [Persistent]
-        public float OrbitalLineWidth = 10f;
-        public event Action<float> OrbitalLineWidthChanged;
-        
         // game default = false
         [Persistent]
         public bool UseSolidGlowFadeTrajectoryTexture = true;
         public event Action<bool> UseSolidGlowFadeTrajectoryTextureChanged;
         
         private MyWindow settingsWindow;
+        
+        // game default = 5f
+        [Persistent]
+        public float ActiveObjectLineWidth = 10f;
+        public event Action<float> ActiveObjectLineWidthChanged;
+        
+        // game default = 5f
+        [Persistent]
+        public float InactiveObjectLineWidth = 8f;
+        public event Action<float> InactiveObjectLineWidthChanged;
+        
+        // game default = ?
+        [Persistent]
+        public float BodyOrbitsLineWidth = 15f;
+        public event Action<float> BodyOrbitsLineWidthChanged;
+        
+        // game default = 5f
+        [Persistent]
+        public float ContractOrbitsLineWidth = 10f;
+        public event Action<float> ContractOrbitsLineWidthChanged;
+        
+
 
         void Awake()
         {
@@ -67,8 +79,9 @@ namespace ThickerTrajectoryLines
                 ApplicationLauncher.AppScenes.TRACKSTATION,
                 Meta.modId,
                 Meta.modId + ".button",
-                $"{Meta.modStaticDataDirpath}/Textures/ToolbarButtonIcon38.png",
-                $"{Meta.modStaticDataDirpath}/Textures/ToolbarButtonIcon24.png",
+                // only supports relative paths
+                $"{Meta.modDirname}/{Meta.modStaticDataDirname}/Textures/ToolbarButtonIcon38.png",
+                $"{Meta.modDirname}/{Meta.modStaticDataDirname}/Textures/ToolbarButtonIcon24.png",
                 "Thicker Trajectory Lines"
             );
         }
@@ -84,47 +97,76 @@ namespace ThickerTrajectoryLines
         void PrepareGUI()
         {
             settingsWindow = new MyWindow("[Settings] Thick Trajectories", 0, 0, 400, 1)
-                .Center();
+                .Center()
 
-            {
-                settingsWindow.Append(
-                    new MySection("TECHNICAL")
+                .Append(new MySection("TECHNICAL"))
+                .Append(
+                    new MySlider("Window Scale", MyGUI.Scale, 1f, 4f, 0.1f)
+                        .OnValueChanged(newValue =>
+                        {
+                            MyGUI.DirtyScale = newValue;
+                        })
+                )
+
+                .Append(new MySection("TRAJECTORIES & ORBITS"))
+                .Append(
+                    new MyToggle("Solid Line Texture (May Require View Change)", UseSolidGlowFadeTrajectoryTexture)
+                        .OnValueChanged(toggle =>
+                        {
+                            UseSolidGlowFadeTrajectoryTexture = toggle;
+                            UseSolidGlowFadeTrajectoryTextureChanged?.Invoke(toggle);
+                        })
+                )
+
+                .Append(
+                    new MySlider("Line Width for the Active Object", ActiveObjectLineWidth, 5f, 50f, 1f)
+                        .OnValueChanged(newValue =>
+                        {
+                            ActiveObjectLineWidth = newValue;
+                            ActiveObjectLineWidthChanged?.Invoke(newValue);
+                        })
+                )
+                // .Append(
+                //     new MySlider("Active Vessel Trajectory Line Width Decay", VesselLineWidth, 0f, 1f, 0.05f)
+                //         .OnValueChanged(newValue =>
+                //         {
+                //             VesselLineWidth = newValue;
+                //             VesselLineWidthChanged?.Invoke(newValue);
+                //         })
+                // )
+                .Append(
+                    new MySlider("Line Width for Inactive Object", InactiveObjectLineWidth, 5f, 50f, 1f)
+                        .OnValueChanged(newValue =>
+                        {
+                            InactiveObjectLineWidth = newValue;
+                            InactiveObjectLineWidthChanged?.Invoke(newValue);
+                        })
+                )
+
+                .Append(
+                    new MySlider("Line Width for Body Orbits", BodyOrbitsLineWidth, 5f, 50f, 1f)
+                        .OnValueChanged(newValue =>
+                        {
+                            BodyOrbitsLineWidth = newValue;
+                            BodyOrbitsLineWidthChanged?.Invoke(newValue);
+                        })
+                )
+
+                .Append(
+                    new MySlider("Line Width for Contract Orbits", ContractOrbitsLineWidth, 5f, 50f, 1f)
+                        .OnValueChanged(newValue =>
+                        {
+                            ContractOrbitsLineWidth = newValue;
+                            ContractOrbitsLineWidthChanged?.Invoke(newValue);
+                        })
                 );
-            }
-            {
-                var slider = new MySlider("Window Scale", MyGUI.Scale, 1f, 4f, 0.1f);
-                slider.ValueChanged += newValue => { 
-                    MyGUI.DirtyScale = newValue;
-                };
-                settingsWindow.Append(slider);
-            }
-            {
-                settingsWindow.Append(new MySection("TRAJECTORY/ORBIT"));
-            }
-            {
-                var slider = new MySlider("Line Width", OrbitalLineWidth, 5f, 50f, 1f);
-                slider.ValueChanged += newValue =>
-                {
-                    OrbitalLineWidth = newValue;
-                    OrbitalLineWidthChanged?.Invoke(newValue);
-                };
-                settingsWindow.Append(slider);
-            }
-            {
-                var toggle = new MyToggle("Use Solid Lines? (May Require View Change)", UseSolidGlowFadeTrajectoryTexture);
-                toggle.ValueChanged += newValue =>
-                {
-                    UseSolidGlowFadeTrajectoryTexture = newValue;
-                    UseSolidGlowFadeTrajectoryTextureChanged?.Invoke(newValue);
-                };
-                settingsWindow.Append(toggle);
-            }
         }
 
         /// <summary>
         /// Save frequency, once max in <=N ms timespan.
+        /// Meant to prevent a billion writes each time user drags a slider.
         /// </summary>
-        private float settingsSaveFrequencyMs = 3000f;
+        private float settingsSaveFrequencyMs = 1000f;
 
         /// <summary>
         /// Whether settings need saving.
@@ -166,7 +208,10 @@ namespace ThickerTrajectoryLines
                 settingsDirty = true;
             }
             
-            OrbitalLineWidthChanged += (_) => DirtySettings();
+            ActiveObjectLineWidthChanged += (_) => DirtySettings();
+            InactiveObjectLineWidthChanged += (_) => DirtySettings();
+            BodyOrbitsLineWidthChanged += (_) => DirtySettings();
+            ContractOrbitsLineWidthChanged += (_) => DirtySettings();
             UseSolidGlowFadeTrajectoryTextureChanged += (_) => DirtySettings();
         }
 
@@ -179,7 +224,7 @@ namespace ThickerTrajectoryLines
 
             var cfg = ConfigNode.CreateConfigFromObject(this);
             log.Verbose("Writing settings to: " + Meta.modUserConfigFilepath);
-            cfg.Save(Meta.modUserConfigFilepath);
+            cfg.Save(Meta.modUserConfigFilepath, "wawa");
 
             return cfg;
         }

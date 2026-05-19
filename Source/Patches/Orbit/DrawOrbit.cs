@@ -21,29 +21,45 @@ namespace ThickerTrajectoryLines
             log.Verbose("Running");
             
             var type = __instance.GetType();
-
-            // OrbitRenderer - renders vessel and body orbits; skip body (non-vessel) orbits
-            if (type == typeof(OrbitRenderer) && __instance.vessel != null)
+            void SetLineWidth(float newWidth)
             {
-                // good
-                log.Verbose("Detected as a vessel orbit");
+                l.lineWidth = newWidth;
             }
-            // ContractOrbitRenderer - renders contract orbits
+
+            // good - OrbitRenderer - renders vessel and body orbits
+            if (type == typeof(OrbitRenderer))
+            {
+                if (__instance.vessel)
+                {
+                    log.Verbose("Detected non-body, non-active-object orbit");
+                    
+                    SetLineWidth(SettingsGUI.Instance.InactiveObjectLineWidth);
+                    SettingsGUI.Instance.InactiveObjectLineWidthChanged += SetLineWidth;
+                }
+                else
+                {
+                    log.Verbose("Detected body orbit");
+                 
+                    SetLineWidth(SettingsGUI.Instance.BodyOrbitsLineWidth);
+                    SettingsGUI.Instance.BodyOrbitsLineWidthChanged += SetLineWidth;
+                }
+            }
+            // good - ContractOrbitRenderer - renders contract orbits
             else if (type == typeof(ContractOrbitRenderer))
             {
-                // good
-                log.Verbose("Detected as a contract orbit");
+                log.Verbose("Detected contract orbit");
+                
+                SetLineWidth(SettingsGUI.Instance.ContractOrbitsLineWidth);
+                SettingsGUI.Instance.ContractOrbitsLineWidthChanged += SetLineWidth;
             }
             else
             {
+                log.Verbose("Detected some other orbit, skipping");
                 return;
             }
             
+            // makes good looking lines
             l.joins = Joins.Weld;
-            
-            Action<float> setLineWidth = newWidth => { l.lineWidth = newWidth; };
-            setLineWidth(SettingsGUI.Instance.OrbitalLineWidth);
-            SettingsGUI.Instance.OrbitalLineWidthChanged += setLineWidth;
             
             // keep a tab at requested texture for the line
             if (Globals.GlowFade)

@@ -13,6 +13,7 @@ namespace ThickerTrajectoryLines
             var log = new Logger("Patch_PatchRendering_MakeVector/Postfix");
             
             log.Verbose("Running");
+            log.Verbose("Detected non-body, active-object orbit");
             
             var vectorLineTraverse = Traverse.Create(__instance).Field("vectorLine");
             if (!vectorLineTraverse.FieldExists())
@@ -35,8 +36,8 @@ namespace ThickerTrajectoryLines
             {
                 vectorLine.lineWidth = newWidth;
             }
-            SetLineWidth(SettingsGUI.Instance.OrbitalLineWidth);
-            SettingsGUI.Instance.OrbitalLineWidthChanged += SetLineWidth;
+            SetLineWidth(SettingsGUI.Instance.ActiveObjectLineWidth);
+            SettingsGUI.Instance.ActiveObjectLineWidthChanged += SetLineWidth;
             
             // keep a tab at requested texture for the line
             if (Globals.GlowFade)

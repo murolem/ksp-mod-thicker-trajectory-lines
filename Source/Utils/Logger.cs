@@ -16,7 +16,8 @@ namespace ThickerTrajectoryLines
     
     public class Logger
     {
-        private string prefix = "ThickerTrajectoryLines";
+        private string staticPrefix = "ThickerTrajectoryLines";
+        private string prefix;
         private string messagePrefix;
         private static LogLevel logLevel =  LogLevel.DEBUG;
 
@@ -85,6 +86,8 @@ namespace ThickerTrajectoryLines
             {
                 msg = "[" + prefix + "] " + msg;
             }
+            
+            msg =  "[" + staticPrefix + "] " + msg;
 
             // debug is a default log level so no need to bloat the log file by specifying it
             if (level != LogLevel.DEBUG)

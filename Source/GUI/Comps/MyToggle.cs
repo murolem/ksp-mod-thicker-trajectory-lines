@@ -11,7 +11,7 @@ namespace ThickerTrajectoryLines
         private MyLabel myLabel;
         
         public bool Toggle;
-        public Action<bool> ValueChanged;
+        public event Action<bool> ValueChanged;
         
         public MyToggle(string label, bool toggle)
         {
@@ -97,6 +97,12 @@ namespace ThickerTrajectoryLines
                 Toggle = newToggled;
                 ValueChanged?.Invoke(newToggled);
             }
+        }
+        
+        public MyToggle OnValueChanged(Action<bool> listener)
+        {
+            ValueChanged += listener;
+            return this;
         }
     }
 }
