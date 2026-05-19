@@ -32,7 +32,7 @@ namespace ThickerTrajectoryLines
         /// <summary>
         /// Static config filepath. Config that is used internally and is shipped with the mod. Meant to be unchanged.
         /// </summary>
-        public static string modStaticConfigFilepath => Path.GetFullPath($"{modDirpath}/config.cfg");
+        public static string modDefaultsConfigFilepath => Path.GetFullPath($"{modStaticDataDirpath}/defaults.cfg");
         
         /// <summary>
         /// Mod user config dirpath. Holds configs that can change throughout the game.

@@ -38,5 +38,13 @@ namespace ThickerTrajectoryLines
         /// If `null`, uses the element's `Style` by calling `EnsureStyle`.</param>
         /// <param name="options">GUI options to pass along to the control.</param>
         void Draw(GUIStyle styleOverride = null, params GUILayoutOption[] options);
+
+        /// <summary>
+        /// Meant for cleanup after component is no longer needed and will no longer be used.
+        ///
+        /// Each component is specifically expected to:
+        /// - Remove any event subscribers.
+        /// </summary>
+        void Destroy();
     }
 }

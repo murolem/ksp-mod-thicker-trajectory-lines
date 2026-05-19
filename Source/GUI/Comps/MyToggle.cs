@@ -85,7 +85,7 @@ namespace ThickerTrajectoryLines
             labelStyle.active = labelStyle.normal;
             labelBtn.Draw(labelStyle, optsAugmented);
             // press = flip
-            var flipToggle = labelBtn.Pressed;
+            var flipToggle = labelBtn.IsPressed;
             
             GUILayout.EndHorizontal();
             
@@ -102,7 +102,13 @@ namespace ThickerTrajectoryLines
         public MyToggle OnValueChanged(Action<bool> listener)
         {
             ValueChanged += listener;
+            listener(Toggle); // for hot reload
             return this;
+        }
+        
+        public void Destroy()
+        {
+            ValueChanged = null;
         }
     }
 }

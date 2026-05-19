@@ -39,5 +39,7 @@ namespace ThickerTrajectoryLines
             var height = style.border.top;
             GUILayout.Box("", style, GUILayout.ExpandWidth(true), GUILayout.Height(height));
         }
+        
+        public void Destroy() { }
     }
 }

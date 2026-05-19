@@ -63,5 +63,7 @@ namespace ThickerTrajectoryLines
             this.Text = text;
             return this;
         }
+        
+        public void Destroy() { }
     }
 }

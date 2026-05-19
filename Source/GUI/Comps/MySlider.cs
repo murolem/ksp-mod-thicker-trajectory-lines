@@ -116,7 +116,13 @@ namespace ThickerTrajectoryLines
         public MySlider OnValueChanged(Action<float> listener)
         {
             ValueChanged += listener;
+            listener(Value); // for hot reload
             return this;
+        }
+        
+        public void Destroy()
+        {
+            ValueChanged = null;
         }
     }
 }

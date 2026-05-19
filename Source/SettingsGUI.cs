@@ -1,6 +1,8 @@
 using System;
 using System.IO;
+using System.Reflection;
 using KSP.UI.Screens;
+using ThickerTrajectoryLines.Attributes;
 using ToolbarControl_NS;
 using UnityEngine;
 
@@ -24,43 +26,46 @@ namespace ThickerTrajectoryLines
         // game default = false
         [Persistent]
         public bool UseSolidGlowFadeTrajectoryTexture = true;
+        [PersistentEvent]
         public event Action<bool> UseSolidGlowFadeTrajectoryTextureChanged;
-        
-        private MyWindow settingsWindow;
         
         // game default = 5f
         [Persistent]
         public float ActiveObjectLineWidth = 10f;
+        [PersistentEvent]
         public event Action<float> ActiveObjectLineWidthChanged;
         
         // game default = 5f
         [Persistent]
         public float InactiveObjectLineWidth = 8f;
+        [PersistentEvent]
         public event Action<float> InactiveObjectLineWidthChanged;
         
         // game default = ?
         [Persistent]
         public float BodyOrbitsLineWidth = 15f;
+        [PersistentEvent]
         public event Action<float> BodyOrbitsLineWidthChanged;
         
         // game default = 5f
         [Persistent]
         public float ContractOrbitsLineWidth = 10f;
+        [PersistentEvent]
         public event Action<float> ContractOrbitsLineWidthChanged;
         
-
-
+        private MyWindow window;
+        
         void Awake()
         {
             Instance = this;
+            EnsureSnapshotOfDefaultSettings();
             LoadSettings();
         }
         
         void Start()
         {
-            PrepareGUI();
+            SetupWindow();
             CreateButtonIcon();
-
             SetupSaveSettingWatcher();
         }
 
@@ -68,13 +73,19 @@ namespace ThickerTrajectoryLines
         {
             TickSaveSettingWatchers();
         }
+
+        void OnDestroy()
+        {
+            var log = Logger.log;
+            log.Verbose("SettingsGUI OnDestroy()!");
+        }
         
         void CreateButtonIcon()
         {
             ToolbarControl = gameObject.AddComponent<ToolbarControl>();
             // toggle instead of Hide/Show since our window is closable by the close button,
             // which the toolbar control doesn't know about and will not update its state. 
-            ToolbarControl.AddToAllToolbars(() => settingsWindow.Toggle(), () => settingsWindow.Toggle(),
+            ToolbarControl.AddToAllToolbars(() => window.Toggle(), () => window.Toggle(),
                 ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW |
                 ApplicationLauncher.AppScenes.TRACKSTATION,
                 Meta.modId,
@@ -88,15 +99,15 @@ namespace ThickerTrajectoryLines
         
         void OnGUI()
         {
-            if (settingsWindow.Visible)
+            if (window.Visible)
             {
-                settingsWindow.Draw();
+                window.Draw();
             }
         }
 
-        void PrepareGUI()
+        void SetupWindow()
         {
-            settingsWindow = new MyWindow("[Settings] Thick Trajectories", 0, 0, 400, 1)
+            window = new MyWindow("[Settings] Thick Trajectories", 0, 0, 400, 1)
                 .Center()
 
                 .Append(new MySection("TECHNICAL"))
@@ -110,7 +121,7 @@ namespace ThickerTrajectoryLines
 
                 .Append(new MySection("TRAJECTORIES & ORBITS"))
                 .Append(
-                    new MyToggle("Solid Line Texture (May Require View Change)", UseSolidGlowFadeTrajectoryTexture)
+                    new MyToggle("Solid Line Texture (May Require Screen Change)", UseSolidGlowFadeTrajectoryTexture)
                         .OnValueChanged(toggle =>
                         {
                             UseSolidGlowFadeTrajectoryTexture = toggle;
@@ -159,6 +170,11 @@ namespace ThickerTrajectoryLines
                             ContractOrbitsLineWidth = newValue;
                             ContractOrbitsLineWidthChanged?.Invoke(newValue);
                         })
+                )
+                
+                .Append(
+                    new MyButton("Reset Settings", GUILayout.ExpandWidth(true))
+                        .OnPressed(ResetSettings)
                 );
         }
 
@@ -198,7 +214,9 @@ namespace ThickerTrajectoryLines
         /// </summary>
         void SetupSaveSettingWatcher()
         {
-            void DirtySettings()
+            var log = Logger.log;
+            
+            void DirtySettings(object obj, EventArgs e)
             {
                 if(settingsDirty)
                     return;
@@ -207,40 +225,48 @@ namespace ThickerTrajectoryLines
                 nextSaveWindowAtTs = timeUnscaledMs + settingsSaveFrequencyMs;
                 settingsDirty = true;
             }
-            
-            ActiveObjectLineWidthChanged += (_) => DirtySettings();
-            InactiveObjectLineWidthChanged += (_) => DirtySettings();
-            BodyOrbitsLineWidthChanged += (_) => DirtySettings();
-            ContractOrbitsLineWidthChanged += (_) => DirtySettings();
-            UseSolidGlowFadeTrajectoryTextureChanged += (_) => DirtySettings();
-        }
 
-        ConfigNode SaveSettings()
+
+            var events = PersistentEvent.GetEventsFromClass(typeof(SettingsGUI), BindingFlags.Public | BindingFlags.Instance);
+            log.Verbose("Found events to setup setting value change watchers on: " + events.Length);
+
+            foreach (var eventInfo in events)
+            {
+                var eventWrapper = new ModelEvent(this, eventInfo);
+                eventWrapper.OnEvent += DirtySettings;
+            }
+        }
+        
+        ConfigNode SaveSettings(string saveFilepathOverride = null)
         {
-            var log = new Logger();
+            var log = Logger.log;
+
+            var saveFilepath = saveFilepathOverride ?? Meta.modUserConfigFilepath;
             
             // ensure dirpath
-            Directory.CreateDirectory(Path.GetDirectoryName(Meta.modUserConfigFilepath)!);
+            Directory.CreateDirectory(Path.GetDirectoryName(saveFilepath)!);
 
             var cfg = ConfigNode.CreateConfigFromObject(this);
-            log.Verbose("Writing settings to: " + Meta.modUserConfigFilepath);
-            cfg.Save(Meta.modUserConfigFilepath, "wawa");
+            log.Verbose("Writing settings to: " + saveFilepath);
+            cfg.Save(saveFilepath, "wawa");
 
             return cfg;
         }
 
-        void LoadSettings()
+        void LoadSettings(string saveFilepathOverride = null)
         {
-            var log = new Logger();
+            var log = Logger.log;
+            
+            var saveFilepath = saveFilepathOverride ?? Meta.modUserConfigFilepath;
             
             // ensure dirpath
-            Directory.CreateDirectory(Path.GetDirectoryName(Meta.modUserConfigFilepath)!);
+            Directory.CreateDirectory(Path.GetDirectoryName(saveFilepath)!);
 
             ConfigNode cfg;
-            if (File.Exists(Meta.modUserConfigFilepath))
+            if (File.Exists(saveFilepath))
             {
-                log.Verbose("Reading settings from: " + Meta.modUserConfigFilepath);
-                cfg = ConfigNode.Load(Meta.modUserConfigFilepath);
+                log.Verbose("Reading settings from: " + saveFilepath);
+                cfg = ConfigNode.Load(saveFilepath);
                 // in case of errors or whatever reset the config
                 if (cfg == null)
                 {
@@ -255,5 +281,36 @@ namespace ThickerTrajectoryLines
             
             ConfigNode.LoadObjectFromConfig(this, cfg);
         }
+
+        /// <summary>
+        /// Creates snapshot of current settings as defaults.
+        ///
+        /// Meant to be called before everything else.
+        /// </summary>
+        void EnsureSnapshotOfDefaultSettings()
+        {
+            var log = Logger.log;
+            log.Verbose("Writing setting defaults");
+            SaveSettings(Meta.modDefaultsConfigFilepath);
+        }
+        
+        /// <summary>
+        /// Loads settings from a default settings snapshot file that is assumed to be created at an earlier step.
+        /// </summary>
+        void ResetSettings()
+        {
+            var log = Logger.log;
+            log.Verbose("Loading default settings");
+            
+            // load defaults
+            LoadSettings(Meta.modDefaultsConfigFilepath);
+            // destroy current window since gui controls don't get updated values
+            window.Destroy();
+            // make new window using the new default values
+            SetupWindow();
+            // and make it visible
+            window.Show();
+        }
+
     }
 }

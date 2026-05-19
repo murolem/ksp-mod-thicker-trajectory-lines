@@ -25,5 +25,7 @@ namespace ThickerTrajectoryLines
         {
             GUILayout.Space(this.pixels * 2);
         }
+        
+        public void Destroy() { }
     }
 }

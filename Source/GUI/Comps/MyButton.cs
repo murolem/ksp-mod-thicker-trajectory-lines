@@ -9,13 +9,16 @@ namespace ThickerTrajectoryLines
         public string Text { get; private set; }
         
         /** Whether the button is currently pressed. */
-        public bool Pressed { get; private set; }
+        public bool IsPressed { get; private set; }
 
-        public Action OnPressed;
+        public Action Pressed;
+
+        private GUILayoutOption[] options;
         
-        public MyButton(string text)
+        public MyButton(string text, params GUILayoutOption[] options)
         {
             this.Text = text;
+            this.options = options;
         }
 
         public GUIStyle EnsureStyle()
@@ -39,12 +42,16 @@ namespace ThickerTrajectoryLines
             EnsureStyle();
 
             var style = styleOverride ?? this.Style;
+
+            var optionsCombined = new GUILayoutOption[this.options.Length + options.Length];
+            this.options.CopyTo(optionsCombined, 0);
+            options.CopyTo(optionsCombined, this.options.Length);
             
-            var wasPressedBefore = Pressed;
-            Pressed = GUILayout.Button(this.Text, style, options);
-            if (Pressed && !wasPressedBefore)
+            var wasPressedBefore = IsPressed;
+            IsPressed = GUILayout.Button(this.Text, style, optionsCombined);
+            if (IsPressed && !wasPressedBefore)
             {
-                OnPressed?.Invoke();
+                Pressed?.Invoke();
             }
         }
         
@@ -52,6 +59,17 @@ namespace ThickerTrajectoryLines
         {
             this.Text = text;
             return this;
+        }
+        
+        public MyButton OnPressed(Action listener)
+        {
+            Pressed += listener;
+            return this;
+        }
+
+        public void Destroy()
+        {
+            Pressed = null;
         }
     }
 }

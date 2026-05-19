@@ -42,7 +42,12 @@ namespace ThickerTrajectoryLines
             this.closeButton = new MyButton("x");
             this.dragRect = new Rect(0, 0, 10000, 0);
             
-            this.closeButton.OnPressed += () => Hide();
+            this.closeButton.Pressed += () => Hide();
+        }
+
+        public Rect GetRectCopy()
+        {
+            return rect;
         }
 
         private MyWindow EnsureStyles()
@@ -237,6 +242,12 @@ namespace ThickerTrajectoryLines
 
             return this;
         }
+        
+        public MyWindow PositionAndResize(Rect fromRect)
+        {
+            rect = fromRect;
+            return this;
+        }
 
         public MyWindow Center()
         {
@@ -376,6 +387,19 @@ namespace ThickerTrajectoryLines
                 case ShowStage.PENDING_OFFSCREEN_DRAW2:
                     this.showStage = ShowStage.PENDING_DOCKING;
                     break;
+            }
+        }
+
+        /// <summary>
+        /// Calls Destroy() on all children. Doesn't actually do anything else. That's your job lazy programmer!
+        ///
+        /// Meant as a way to stop using this window without side effects like event handlers continuing.
+        /// </summary>
+        public void Destroy()
+        {
+            foreach (var child in children)
+            {
+                child.Destroy();
             }
         }
     }
