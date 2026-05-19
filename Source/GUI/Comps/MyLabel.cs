@@ -26,8 +26,8 @@ namespace ThickerTrajectoryLines
                 {
                     this.Style.fontSize = MyGUI.FontSize;
                 }
-                OnScaleChanged(MyGUI.Scale);
-                MyGUI.ScaleChanged += OnScaleChanged;
+                OnScaleChanged(SettingsGUI.Instance.Scale);
+                SettingsGUI.Instance.ScaleChanged += OnScaleChanged;
             }
             return this.Style;
         }

@@ -79,7 +79,7 @@ namespace ThickerTrajectoryLines
             
             var sliderThumbStyle = thumbStyleOverride ?? this.ThumbStyle;;
         
-            var sliderHeight = 18f * MyGUI.Scale;
+            var sliderHeight = 18f * SettingsGUI.Instance.Scale;
             
             var optsAugmented = new GUILayoutOption[options.Length + 1];
             optsAugmented[0] = GUILayout.Height(sliderHeight);

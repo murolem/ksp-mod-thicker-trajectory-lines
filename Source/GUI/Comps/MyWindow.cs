@@ -73,7 +73,7 @@ namespace ThickerTrajectoryLines
             this.contentContainerStyle.margin = MyGUI.RectOffset(0);
             
             // trigger here for initial calculation
-            OnScaleChanged(MyGUI.Scale);
+            OnScaleChanged(SettingsGUI.Instance.Scale);
             
             void OnScaleChanged(float newScale)
             {
@@ -96,7 +96,7 @@ namespace ThickerTrajectoryLines
                 this.dragRect.height = titleLabel.Style.CalcSize(new GUIContent(titleLabel.Text)).y +
                                        titleContainerStyle.padding.vertical * 2f;
             }
-            MyGUI.ScaleChangedLowPriority += OnScaleChanged;
+            SettingsGUI.Instance.ScaleChangedLowPriority += OnScaleChanged;
             
             return this;
         }
@@ -293,11 +293,9 @@ namespace ThickerTrajectoryLines
             rect = GUILayout.Window(id, rect, _Draw, "", style, GUILayout.Width(rect.width), GUILayout.ExpandWidth(true));
             
             // scale if possible (when user lets go of the scale slider)
-            if (MyGUI.Scale != MyGUI.DirtyScale && !Input.GetMouseButton(0))
+            if (SettingsGUI.Instance.Scale != SettingsGUI.Instance.DirtyScale && !Input.GetMouseButton(0))
             {
-                MyGUI.Scale = MyGUI.DirtyScale;
-                MyGUI.ScaleChanged?.Invoke(MyGUI.Scale);
-                MyGUI.ScaleChangedLowPriority?.Invoke(MyGUI.Scale);
+                SettingsGUI.Instance.SetScale(SettingsGUI.Instance.DirtyScale);
             }
         }
         
@@ -317,9 +315,9 @@ namespace ThickerTrajectoryLines
             GUILayout.BeginHorizontal(titleContainerStyle);
             
             GUILayout.BeginVertical();
-            GUILayout.Space(5f * MyGUI.Scale);
+            GUILayout.Space(5f * SettingsGUI.Instance.Scale);
             this.titleLabel.Draw(null, GUILayout.ExpandWidth(true));
-            GUILayout.Space(5f * MyGUI.Scale);
+            GUILayout.Space(5f * SettingsGUI.Instance.Scale);
             GUILayout.EndVertical();
 
             var btnTextSize = closeButton.Style.CalcSize(new GUIContent(closeButton.Text));
@@ -343,7 +341,7 @@ namespace ThickerTrajectoryLines
                 {
                     if (firstSectionPassed)
                     {
-                        GUILayout.Space(20f * MyGUI.Scale);
+                        GUILayout.Space(20f * SettingsGUI.Instance.Scale);
                     }
                     else
                     {
@@ -363,7 +361,7 @@ namespace ThickerTrajectoryLines
                     }
                     else
                     {
-                        GUILayout.Space(10f * MyGUI.Scale);
+                        GUILayout.Space(10f * SettingsGUI.Instance.Scale);
                     }
                 }
                 

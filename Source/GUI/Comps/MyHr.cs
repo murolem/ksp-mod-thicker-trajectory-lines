@@ -25,8 +25,8 @@ namespace ThickerTrajectoryLines
                     this.Style.border.top = Mathf.RoundToInt(height);
                     this.Style.border.bottom = Mathf.RoundToInt(height);
                 }
-                OnScaleChanged(MyGUI.Scale);
-                MyGUI.ScaleChanged += OnScaleChanged;
+                OnScaleChanged(SettingsGUI.Instance.Scale);
+                SettingsGUI.Instance.ScaleChanged += OnScaleChanged;
             }
             return this.Style;
         }

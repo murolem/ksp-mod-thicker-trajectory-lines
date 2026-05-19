@@ -23,6 +23,30 @@ namespace ThickerTrajectoryLines
         public static SettingsGUI Instance { get; private set; }
         public static ToolbarControl ToolbarControl { get; private set; }
         
+        /// <summary>
+        /// UI Scale. Only updates when user lets go of the scale slider.
+        ///
+        /// !DO NOT SET DIRECTLY!
+        /// </summary>
+        [Persistent]
+        public float Scale = GameSettings.UI_SCALE;
+        [PersistentEvent]
+        public event Action<float> ScaleChanged;
+        
+        /// <summary>
+        /// Same as `ScaleChanged`, but subscribes get invoked only after all the subscribes at the main event.
+        ///
+        /// Meant to only be used internally by `MyWindow`.
+        /// </summary>
+        [PersistentEvent]
+        public event Action<float> ScaleChangedLowPriority;
+
+        /// <summary>
+        /// Scale but changes constantly while user drags the scale slider.
+        /// The normal scale is only updated when users lets go of the slider.
+        /// </summary>
+        public float DirtyScale = GameSettings.UI_SCALE;
+        
         // game default = false
         [Persistent]
         public bool UseSolidGlowFadeTrajectoryTexture = true;
@@ -79,6 +103,17 @@ namespace ThickerTrajectoryLines
             var log = Logger.log;
             log.Verbose("SettingsGUI OnDestroy()!");
         }
+
+        /// <summary>
+        /// Sets the scale and invokes the change event. Meant to be called by MyWindow control.
+        /// </summary>
+        /// <param name="newScale"></param>
+        public void SetScale(float newScale)
+        {
+            this.Scale = newScale;
+            this.ScaleChanged?.Invoke(newScale);
+            this.ScaleChangedLowPriority?.Invoke(newScale);
+        }
         
         void CreateButtonIcon()
         {
@@ -107,15 +142,15 @@ namespace ThickerTrajectoryLines
 
         void SetupWindow()
         {
-            window = new MyWindow("[Settings] Thick Trajectories", 0, 0, 400, 1)
+            window = new MyWindow("[Settings] Thick Trajectories", 0, 0, 500, 1)
                 .Center()
 
                 .Append(new MySection("TECHNICAL"))
                 .Append(
-                    new MySlider("Window Scale", MyGUI.Scale, 1f, 4f, 0.1f)
+                    new MySlider("Window Scale", Scale, 1f, 4f, 0.1f)
                         .OnValueChanged(newValue =>
                         {
-                            MyGUI.DirtyScale = newValue;
+                            DirtyScale = newValue;
                         })
                 )
 

@@ -30,8 +30,8 @@ namespace ThickerTrajectoryLines
                 {
                     this.Style.fontSize = MyGUI.FontSize;
                 }
-                OnScaleChanged(MyGUI.Scale);
-                MyGUI.ScaleChanged += OnScaleChanged;
+                OnScaleChanged(SettingsGUI.Instance.Scale);
+                SettingsGUI.Instance.ScaleChanged += OnScaleChanged;
             }
             return this.Style;
         }
@@ -47,7 +47,7 @@ namespace ThickerTrajectoryLines
             
             var margin = toggleStyle.margin;
             margin.right = 0;
-            var height = 18f * MyGUI.Scale;
+            var height = 18f * SettingsGUI.Instance.Scale;
             
             // reset whatever offsets values the toggle had
             toggleStyle.border = new RectOffset(0, 0, 0, 0);

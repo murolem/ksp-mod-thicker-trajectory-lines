@@ -34,36 +34,13 @@ namespace ThickerTrajectoryLines
     {
         public static GUISkin defaultSkin = HighLogic.Skin;
         
-        /// <summary>
-        /// UI Scale. Only updates when user lets go of the scale slider.
-        /// </summary>
-        public static float Scale = GameSettings.UI_SCALE;
-        public static Action<float> ScaleChanged;
-        /// <summary>
-        /// Same as `ScaleChanged`, but subscribes get invoked only after all the subscribes at the main event.
-        ///
-        /// Meant to only be used internally by `MyWindow`.
-        /// </summary>
-        public static Action<float> ScaleChangedLowPriority;
-
-        /// <summary>
-        /// Called once before first draw happens but during OnGUI. Useful for setting up Unity GUI related stuff. 
-        /// </summary>
-        public static Action BeforeFirstDraw;
-
-        /// <summary>
-        /// Scale but changes constantly while user drags the scale slider.
-        /// The normal scale is only updated when users lets go of the slider.
-        /// </summary>
-        public static float DirtyScale = Scale;
-
         // a random value I found in ksp source code. idk how to get actual font size
         public static readonly int BaseFontSize = 14;
 
         /// <summary>
         /// Current font size with respect to the current scale.
         /// </summary>
-        public static int FontSize => Mathf.RoundToInt(BaseFontSize * Scale);
+        public static int FontSize => Mathf.RoundToInt(BaseFontSize * SettingsGUI.Instance.Scale);
 
         /// <summary>
         /// Get GUI style with a predefined name.
@@ -114,10 +91,10 @@ namespace ThickerTrajectoryLines
 
         public static RectOffset ScaleRectOffset(RectOffset baseOffset, RectOffset currentOffset)
         {
-            currentOffset.left = Mathf.RoundToInt(baseOffset.left * Scale);
-            currentOffset.right = Mathf.RoundToInt(baseOffset.right * Scale);
-            currentOffset.top = Mathf.RoundToInt(baseOffset.top * Scale);
-            currentOffset.bottom = Mathf.RoundToInt(baseOffset.bottom * Scale);
+            currentOffset.left = Mathf.RoundToInt(baseOffset.left * SettingsGUI.Instance.Scale);
+            currentOffset.right = Mathf.RoundToInt(baseOffset.right * SettingsGUI.Instance.Scale);
+            currentOffset.top = Mathf.RoundToInt(baseOffset.top * SettingsGUI.Instance.Scale);
+            currentOffset.bottom = Mathf.RoundToInt(baseOffset.bottom * SettingsGUI.Instance.Scale);
             return currentOffset;
         }
 

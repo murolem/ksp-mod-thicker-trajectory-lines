@@ -32,8 +32,8 @@ namespace ThickerTrajectoryLines
                     labelStyle.fontSize = Mathf.RoundToInt(MyGUI.FontSize * 1.15f);
                     hrStyle.margin.bottom = Mathf.RoundToInt(8f * newScale);
                 }
-                OnScaleChanged(MyGUI.Scale);
-                MyGUI.ScaleChanged += OnScaleChanged;
+                OnScaleChanged(SettingsGUI.Instance.Scale);
+                SettingsGUI.Instance.ScaleChanged += OnScaleChanged;
             }
             return this.Style;
         }
