@@ -40,6 +40,21 @@
     <ItemGroup>
       <Folder Include="Static\" />
     </ItemGroup>
+    
+    <ItemGroup>
+      <Reference Include="Assembly-CSharp">
+        <HintPath>..\..\.var\app\com.valvesoftware.Steam\.local\share\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\Assembly-CSharp.dll</HintPath>
+      </Reference>
+      <Reference Include="mscorlib">
+        <HintPath>..\..\.var\app\com.valvesoftware.Steam\.local\share\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\mscorlib.dll</HintPath>
+      </Reference>
+      <Reference Include="UnityEngine">
+        <HintPath>..\..\.var\app\com.valvesoftware.Steam\.local\share\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\UnityEngine.dll</HintPath>
+      </Reference>
+      <Reference Include="UnityEngine.CoreModule">
+        <HintPath>..\..\.var\app\com.valvesoftware.Steam\.local\share\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      </Reference>
+    </ItemGroup>
 
     <!-- include static assets -->
     <Target Name="OnBuild" BeforeTargets="Build">

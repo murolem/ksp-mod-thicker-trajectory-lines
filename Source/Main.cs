@@ -2,11 +2,7 @@
 using HarmonyLib;
 using UnityEngine;
 
-// todo click blocking
-// todo replace all Debug. with the Logger calls
-// todo why are you (not) running. verbose patch log()s not running for some reason? log.Verbose
-// todo move scale to the the settings gui class. make it saveable.
-// make settings log not verbose since that's something user can interact with? potentially
+// todo fix float settings saving/loading with floating error
 
 namespace ThickerTrajectoryLines
 {
@@ -54,8 +50,7 @@ namespace ThickerTrajectoryLines
     {
         void Start()
         {
-            // todo remove on release
-            Logger.SetLogLevel(LogLevel.VERBOSE);
+            Logger.SetLogLevel(LogLevel.DEBUG);
 
             var log = new Logger();
             log.Debug("Patching");
@@ -71,7 +66,14 @@ namespace ThickerTrajectoryLines
                 256,
                 16
             );
-            log.Debug("Loading glow fade texture: " + (Globals.GlowFade == null ? "failed" : "successful" ));
+            if (Globals.GlowFade == null)
+            {
+                log.Error("Loading glow fade texture... failed");
+            }
+            else
+            {
+                log.Verbose("Loading glow fade texture... successful");
+            }
         }
 
         static Texture2D LoadTextureFromFile(string filepath, int width, int height)
